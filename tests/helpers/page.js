@@ -5,7 +5,10 @@ const userFactory = require('../factories/userFactory');
 
 class CustomPage {
 	static async build() {
-		const browser = await puppeteer.launch({ headless: false });
+		const browser = await puppeteer.launch({
+			headless: true,
+			args: ['--no-sandbox'] //decrease the amount of time to run tests
+		});
 		const page = await browser.newPage();
 
 		const customPage = new CustomPage(page);
@@ -35,7 +38,7 @@ class CustomPage {
 		await this.page.setCookie({ name: 'session.sig', value: sig });
 
 		//refresh the page and go to blogs
-		await this.page.goto('localhost:3000/blogs');
+		await this.page.goto('http://localhost:3000/blogs');
 
 		//Wait for the element to be visible
 		await this.page.waitFor('a[href="/auth/logout"]');
@@ -44,35 +47,6 @@ class CustomPage {
 	async getContentsOf(selector) {
 		return await this.page.$eval(selector, el => el.innerHTML);
 	}
-
-	// async get(path) {
-	// 	return await this.page.evaluate(_path => {
-	// 		return fetch(_path, {
-	// 			method: 'GET',
-	// 			credentials: 'same-origin',
-	// 			headers: {
-	// 				'Content-Type': 'application/json'
-	// 			}
-	// 		}).then(res => res.json());
-	// 	}, path);
-	// }
-
-	// async post(path, data) {
-	// 	return await this.page.evaluate(
-	// 		(_path, _data) => {
-	// 			return fetch(_path, {
-	// 				method: 'POST',
-	// 				credentials: 'same-origin',
-	// 				headers: {
-	// 					'Content-Type': 'application/json'
-	// 				},
-	// 				body: JSON.stringify(_data)
-	// 			}).then(res => res.json());
-	// 		},
-	// 		path,
-	// 		data
-	// 	);
-	// }
 
 	async makeRequest(path, type, data = {}) {
 		return await this.page.evaluate(
